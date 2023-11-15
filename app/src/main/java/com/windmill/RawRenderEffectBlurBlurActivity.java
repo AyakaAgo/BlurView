@@ -10,6 +10,7 @@ import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -28,14 +29,12 @@ public class RawRenderEffectBlurBlurActivity extends BaseWebBlurActivity {
     /**
      * bitmap holding blur data
      */
-    private Bitmap capture;
-    private Canvas captureCanvas;
-    private View blurView;
+    Bitmap capture;
 
     @SuppressLint("DrawAllocation")
     @Override
     protected void onCreateBlurView() {
-        blurView = new View(this) {
+        View blurView = new View(this) {
             private final Paint paint = new Paint();
 
             @Override
@@ -60,7 +59,7 @@ public class RawRenderEffectBlurBlurActivity extends BaseWebBlurActivity {
                 layoutParams.height = UiUtil.getDpValue(this, 200),
                 Bitmap.Config.ARGB_8888
         );
-        captureCanvas = new Canvas();
+        Canvas captureCanvas = new Canvas();
         captureCanvas.setBitmap(capture);
 
         webView.getViewTreeObserver().addOnPreDrawListener(() -> {
@@ -71,6 +70,9 @@ public class RawRenderEffectBlurBlurActivity extends BaseWebBlurActivity {
             blurView.invalidate();
             return true;
         });
+
+        Toast.makeText(this, "This page is not blurred by BlurView.", Toast.LENGTH_SHORT)
+                .show();
     }
 
 }

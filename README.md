@@ -1,45 +1,45 @@
-[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
 # BlurView
 
-<a href="url"><img src="https://user-images.githubusercontent.com/1433500/174389657-f52837db-005b-4a68-b9c6-ce196fa03395.jpg" width="432" ></a>
+<img src="https://user-images.githubusercontent.com/1433500/174389657-f52837db-005b-4a68-b9c6-ce196fa03395.jpg" width="40%">
 
 Dynamic iOS-like blur for Android Views. Includes library and small example project.
 
-BlurView can be used as a regular FrameLayout. It blurs its underlying content and draws it as a
+BlurView can be used as a regular FrameLayout. It blurs specified view content and draws it as a
 background for its children. The children of the BlurView are not blurred. BlurView redraws its
 blurred content when changes in view hierarchy are detected (draw() called). It honors its position
 and size changes, including view animation and property animation.
 
 ## How to use
 ```XML
-  <eightbitlab.com.blurview.BlurView
-      android:id="@+id/blurView"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      app:blurOverlayColor="@color/colorOverlay">
+<com.windmill.blur.BlurView
+    android:id="@+id/blurView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    app:blurRadius="25"
+    app:blurScale="12"
+    app:blurTarget="@id/blur_target"
+    app:blurWithPreDraw="false"
+    app:overlayColor="#10FF00FF">
 
-       <!--Any child View here, TabLayout for example. This View will NOT be blurred -->
+    <!--
+      you can declare app:blurTarget to use without call BlurView#with methods
+      app:blurTarget view id, target view to blur
+      app:blurWithPreDraw only used when app:blurTarget set
 
-  </eightbitlab.com.blurview.BlurView>
+      frameClearDrawable is setFrameClearDrawable
+
+      Any child View here, TabLayout for example. This View will NOT be blurred
+    -->
+
+</com.windmill.blur.BlurView>
 ```
 
 ```Java
-    float radius = 20f;
-
-    View decorView = getWindow().getDecorView();
-    // ViewGroup you want to start blur from. Choose root as close to BlurView in hierarchy as possible.
-    ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
-    
-    // Optional:
-    // Set drawable to draw in the beginning of each blurred frame.
-    // Can be used in case your layout has a lot of transparent space and your content
-    // gets a too low alpha value after blur is applied.
-    Drawable windowBackground = decorView.getBackground();
-
-    blurView.setupWith(rootView, new RenderScriptBlur(this)) // or RenderEffectBlur
-           .setFrameClearDrawable(windowBackground) // Optional
-           .setBlurRadius(radius)
+//see :app for example & information
+//method chaining is removed
+blurView.with(rootView, new RenderScriptBlur(this)) //or RenderEffectBlur
+blurView.setBlurRadius(radius)
 ```
 
 Always try to choose the closest possible root layout to BlurView. This will greatly reduce the amount of work needed for creating View hierarchy snapshot.
@@ -47,24 +47,13 @@ Always try to choose the closest possible root layout to BlurView. This will gre
 ## SurfaceView, TextureView, VideoView, MapFragment, GLSurfaceView, etc
 BlurView currently doesn't support blurring of these targets, because they work only with hardware-accelerated Canvas, and BlurView relies on a software Canvas to make a snapshot of Views to blur.
 
-## Gradle
+## Rounded corners and other clips
+It's possible to set rounded corners as same way as other regular Views:
+- [ViewOutlineProvider](https://developer.android.com/reference/android/view/ViewOutlineProvider) (API 21+)
+- [Drawable](https://developer.android.com/reference/android/graphics/drawable/Drawable) with [getOutline](https://developer.android.com/reference/android/graphics/drawable/Drawable?hl=en#getOutline(android.graphics.Outline)) overridden (API 21+)
 
-Since JCenter is closing, please use https://jitpack.io/ and release tags as the source of stable
-artifacts.
-```Groovy
-implementation 'com.github.Dimezis:BlurView:version-2.0.3'
-```
+For API below 21, you can still rounded the blur background but the view content is still rectangle.
 
-## Rounded corners
-It's possible to set rounded corners without, the algorithm is the same way as with other regular Views:
-
-Create a rounded drawable, and set it as a background.
-
-Then set up the clipping, so the BlurView doesn't draw outside the corners 
-```Java
-blurView.setOutlineProvider(ViewOutlineProvider.BACKGROUND);
-blurView.setClipToOutline(true);
-```
 Related thread - https://github.com/Dimezis/BlurView/issues/37
 
 ## Why blurring on the main thread?
