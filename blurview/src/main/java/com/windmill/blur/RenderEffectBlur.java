@@ -90,7 +90,7 @@ public class RenderEffectBlur extends BlurImpl {
                 //noinspection deprecation
                 fallImpl = new RenderScriptBlur(context);
                 fallImpl.from(this);
-                Log.i(BlurView.TAG, "canvas is not hardware-accelerated, created fallback RenderScriptBlur.");
+                BlurView.log(Log.WARN, "canvas is not hardware-accelerated, created fallback RenderScriptBlur.");
             }
             fallImpl.blur(bitmap);
             fallImpl.render(canvas, bitmap);

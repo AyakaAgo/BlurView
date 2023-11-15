@@ -39,7 +39,7 @@ public class BlurImpl {
         //call methods to avoid skipping necessary initial steps
         setRadius(copy.radius);
         setScale(copy.scale);
-        Log.i(BlurView.TAG, "BlurImpl copy from: radius = " + radius + ", scale = " + scale);
+        BlurView.log(Log.INFO, "BlurImpl copy from: radius = " + radius + ", scale = " + scale);
     }
 
     public void setRadius(float radius) {

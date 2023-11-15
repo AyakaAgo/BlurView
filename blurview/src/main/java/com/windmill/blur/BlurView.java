@@ -20,9 +20,12 @@ import androidx.annotation.Nullable;
  * Can have children and draw them over blurred background.
  */
 public class BlurView extends FrameLayout {
-    protected static final String TAG = "BlurView";//.class.getSimpleName();
+    private static final boolean DEBUG = false;
+    private static final String TAG = "BlurView";//.class.getSimpleName();
     @NonNull
     private BlurHelper helper = new BlurHelper();
+    private int targetId;
+    private boolean targetWithPreDraw;
 
     public BlurView(Context context) {
         super(context);
@@ -43,11 +46,21 @@ public class BlurView extends FrameLayout {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
     }
 
+    protected static void log(int level, String message) {
+        if (DEBUG) {
+            Log.println(level, TAG, message);
+        }
+    }
+
     private void init(AttributeSet attrs, int defStyleAttr) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.BlurView, defStyleAttr, 0);
         setOverlayColor(a.getColor(R.styleable.BlurView_overlayColor, Color.TRANSPARENT));
         setBlurRadius(a.getFloat(R.styleable.BlurView_blurRadius, BlurImpl.DEFAULT_RADIUS));
         setBlurScale(a.getFloat(R.styleable.BlurView_blurScale, BlurImpl.DEFAULT_SCALE));
+        targetId = a.getResourceId(R.styleable.BlurView_blurTarget, 0);
+        if (targetId != 0) {
+            targetWithPreDraw = a.getBoolean(R.styleable.BlurView_blurWithPreDraw, true);
+        }
         a.recycle();
     }
 
@@ -72,9 +85,20 @@ public class BlurView extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (isHardwareAccelerated()) {
+            if (targetId != 0) {
+                View target = getRootView().findViewById(targetId);
+                if (target != null) {
+                    with(target, targetWithPreDraw);
+                    log(Log.INFO, "init with target id 0x" + Integer.toHexString(targetId) + ", pre draw " + targetWithPreDraw);
+                } else {
+                    log(Log.ERROR, "blurTarget should have same root view with BlurView");
+                }
+                targetId = 0;
+                return;
+            }
             helper.setDynamic(true);
         } else {
-            Log.i(TAG, "BlurView can't be used in not hardware-accelerated window!");
+            log(Log.WARN, "BlurView can't be used in not hardware-accelerated window!");
         }
     }
 
@@ -122,7 +146,7 @@ public class BlurView extends FrameLayout {
 
     public void with(@NonNull BlurHelper helper, boolean copyConfiguration) {
         BlurHelper old = this.helper;
-        if (copyConfiguration){
+        if (copyConfiguration) {
             helper.from(old);
         }
         old.free();

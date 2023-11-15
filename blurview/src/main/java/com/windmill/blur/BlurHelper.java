@@ -31,7 +31,7 @@ public class BlurHelper {
         //call methods to avoid skipping necessary initial steps
         setEnabled(copy.enabled);
         setOverlayColor(copy.overlayColor);
-        Log.i(BlurView.TAG, "BlurHelper copy from: enabled = " + enabled + ", overlayColor = " + overlayColor);
+        BlurView.log(Log.INFO, "BlurHelper copy from: enabled = " + enabled + ", overlayColor = " + overlayColor);
         impl.from(copy.impl);
     }
 
