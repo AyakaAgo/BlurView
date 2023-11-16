@@ -4,6 +4,7 @@
         <attr name="overlayColor" format="color"/>
         <attr name="blurRadius" format="float"/>
         <attr name="blurScale" format="float"/>
+        <attr name="cornerRadius" format="float"/>
         <!-- blurTarget should be in same root view with BlurView -->
         <attr name="blurTarget" format="reference"/>
         <!-- only used when blurTarget is set  -->

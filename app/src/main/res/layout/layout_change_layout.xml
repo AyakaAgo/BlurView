@@ -7,18 +7,21 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/android_logo"
+        android:src="@android:drawable/sym_def_app_icon"
         android:id="@+id/blur_target"
         android:padding="24dp"
         android:importantForAccessibility="no" />
 
     <!-- app:xxx configs -->
     <com.windmill.blur.BlurView
+        android:id="@+id/blur_view"
         android:layout_width="300dp"
         android:layout_height="200dp"
         android:layout_gravity="center"
         android:background="@android:color/white"
+        android:elevation="8dp"
         app:blurRadius="25"
+        app:cornerRadius="50"
         app:blurScale="12"
         app:blurTarget="@id/blur_target"
         app:blurWithPreDraw="false"

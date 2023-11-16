@@ -13,14 +13,15 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-import dalvik.annotation.TestTarget;
+import androidx.annotation.RequiresApi;
 
 /**
  * base {@link WebView} blur activity
- * <p></p>
- * <p>
- * <strong>DO NOT</strong> use in production
+ * <br><br>
+ * WebView blur may cause web content flicker, complex web content may case fps drops.
  */
+@Deprecated
+//@Discouraged(message = "WebView blur may cause web content flicker, complex web content may case fps drops.")
 abstract class BaseWebBlurActivity extends Activity {
     protected static final int blurRadius = 25;
     protected WebView webView;
@@ -38,6 +39,7 @@ abstract class BaseWebBlurActivity extends Activity {
 
         //simply setup webview
         webView.setWebViewClient(new WebViewClient() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return shouldOverrideUrlLoading(view, request.getUrl().toString());
@@ -64,15 +66,10 @@ abstract class BaseWebBlurActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setUseWideViewPort(true);
         settings.setDatabaseEnabled(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            settings.setAlgorithmicDarkeningAllowed(true);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            webView.setForceDarkAllowed(true);
-        }
 
         onCreateBlurView();
 
-        webView.loadUrl("https://bing.com");
+        webView.loadUrl(getString(R.string.webview_url));
 
         webViewContainer.addView(webView);
         content.addView(webViewContainer);

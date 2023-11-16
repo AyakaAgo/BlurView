@@ -32,18 +32,21 @@ public class MainActivity extends Activity {
             }
         };
 
-        ArrayList<Class<? extends Activity>> classes = new ArrayList<>();
-        classes.add(PreDrawBlurActivity.class);
-        classes.add(LayoutChangeBlurActivity.class);
+        ArrayList<Impl> classes = new ArrayList<>();
+        classes.add(new Impl(getString(R.string.blurview_predraw_webview), WebViewPreDrawBlurActivity.class));
+        classes.add(new Impl(getString(R.string.blurview_layoutchange_webview), WebViewLayoutChangeBlurActivity.class));
+        classes.add(new Impl(getString(R.string.blurview_layoutchange_imageview), ImageViewLayoutChangeBlurActivity.class));
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            classes.add(RawRenderEffectBlurBlurActivity.class);
+            classes.add(new Impl(getString(R.string.view_simple_rendereffect), RawWebViewPreDrawBlurActivity.class));
         }
 
-        for (Class<? extends Activity> cls : classes) {
+        for (Impl impl : classes) {
             boolean hasChild = content.getChildCount() > 0;
+
             Button btn = new Button(this);
-            btn.setText(cls.getSimpleName());
-            btn.setTag(cls);
+            btn.setText(impl.name);
+            btn.setTag(impl.className);
+            btn.setAllCaps(false);
             btn.setOnClickListener(activityStartListener);
             content.addView(btn);
 
@@ -55,6 +58,16 @@ public class MainActivity extends Activity {
         }
 
         setContentView(content);
+    }
+
+    private static class Impl {
+        protected String name;
+        protected Class<? extends Activity> className;
+
+        protected Impl(String name, Class<? extends Activity> className) {
+            this.name = name;
+            this.className = className;
+        }
     }
 
 }

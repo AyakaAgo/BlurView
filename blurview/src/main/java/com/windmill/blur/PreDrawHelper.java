@@ -3,7 +3,6 @@ package com.windmill.blur;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.IBinder;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -55,10 +54,6 @@ public class PreDrawHelper extends BlurHelper {
         init();
     }
 
-    private static boolean isLaidOut(View view) {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? view.isLaidOut() : view.getHeight() > 0 && view.getWidth() > 0;
-    }
-
     /**
      * perform a blur change
      */
@@ -99,9 +94,9 @@ public class PreDrawHelper extends BlurHelper {
         }
         initialized = true;
 
-        if (isLaidOut(target)) {
+        if (target.isLaidOut()) {
             IBinder blurViewWindowToken;
-            if (!isLaidOut(blurView) || (blurViewWindowToken = blurView.getWindowToken()) == null || target.getWindowToken() != blurViewWindowToken) {
+            if (!blurView.isLaidOut() || (blurViewWindowToken = blurView.getWindowToken()) == null || target.getWindowToken() != blurViewWindowToken) {
                 // Usually it's not needed, because `onPreDraw` updates the blur anyway.
                 // But it handles cases when the PreDraw listener is attached to a different Window, for example
                 // when the BlurView is in a Dialog window, but the root is in the Activity.

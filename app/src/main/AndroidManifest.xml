@@ -21,15 +21,19 @@
         </activity>
 
         <activity
-            android:name=".PreDrawBlurActivity"
+            android:name=".ImageViewLayoutChangeBlurActivity"
             android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
 
         <activity
-            android:name=".LayoutChangeBlurActivity"
+            android:name=".WebViewLayoutChangeBlurActivity"
             android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
 
         <activity
-            android:name=".RawRenderEffectBlurBlurActivity"
+            android:name=".WebViewPreDrawBlurActivity"
+            android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
+
+        <activity
+            android:name=".RawWebViewPreDrawBlurActivity"
             android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
 
     </application>

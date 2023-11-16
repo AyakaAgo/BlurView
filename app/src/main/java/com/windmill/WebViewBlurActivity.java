@@ -4,28 +4,27 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
-import com.windmill.ui.RoundedOutline;
 import com.windmill.ui.UiUtil;
 import com.windmill.blur.BlurView;
 import com.windmill.blur.PreDrawHelper;
 
 /**
- * a test class for {@link PreDrawHelper}
- * <p>
- * <strong>DO NOT</strong> use it in production environment
+ * test class for {@link PreDrawHelper}
  */
-public class PreDrawBlurActivity extends BaseWebBlurActivity {
+abstract class WebViewBlurActivity extends BaseWebBlurActivity {
+    protected BlurView blurView;
+
+    protected abstract boolean useOnPreDraw();
 
     @Override
     protected void onCreateBlurView() {
-        BlurView blurView = new BlurView(this);
+        blurView = new BlurView(this);
         blurView.setElevation(blurRadius);
         blurView.setBlurRadius(blurRadius / 5f);
         blurView.setBackgroundColor(Color.BLUE);
         blurView.setOverlayColor(0X10FF00FF);
-        blurView.with(webViewContainer);
-        blurView.setOutlineProvider(RoundedOutline.get(blurRadius));
-        blurView.setClipToOutline(true);
+        blurView.with(webViewContainer, useOnPreDraw());
+        blurView.setCornerRadius(blurRadius);
 
         content.addView(blurView);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) blurView.getLayoutParams();

@@ -4,14 +4,18 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 
 import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.ColorInt;
+import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -22,10 +26,12 @@ import androidx.annotation.Nullable;
 public class BlurView extends FrameLayout {
     private static final boolean DEBUG = false;
     private static final String TAG = "BlurView";//.class.getSimpleName();
+
     @NonNull
     private BlurHelper helper = new BlurHelper();
     private int targetId;
     private boolean targetWithPreDraw;
+    private FpsFrameCallback frameCallback;
 
     public BlurView(Context context) {
         super(context);
@@ -54,11 +60,24 @@ public class BlurView extends FrameLayout {
 
     private void init(AttributeSet attrs, int defStyleAttr) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.BlurView, defStyleAttr, 0);
-        setOverlayColor(a.getColor(R.styleable.BlurView_overlayColor, Color.TRANSPARENT));
-        setBlurRadius(a.getFloat(R.styleable.BlurView_blurRadius, BlurImpl.DEFAULT_RADIUS));
-        setBlurScale(a.getFloat(R.styleable.BlurView_blurScale, BlurImpl.DEFAULT_SCALE));
-        targetId = a.getResourceId(R.styleable.BlurView_blurTarget, 0);
-        if (targetId != 0) {
+        int overlayColor = a.getColor(R.styleable.BlurView_overlayColor, Color.TRANSPARENT);
+        if (overlayColor != Color.TRANSPARENT) {
+            setOverlayColor(overlayColor);
+        }
+        float blurRadius = a.getFloat(R.styleable.BlurView_blurRadius, 0);
+        if (blurRadius > 0) {
+            setBlurRadius(blurRadius);
+        }
+        float blurScale = a.getFloat(R.styleable.BlurView_blurScale, 0);
+        if (blurScale >= 1) {
+            setBlurScale(blurScale);
+        }
+        float cornerRadius = a.getFloat(R.styleable.BlurView_cornerRadius, 0);
+        if (cornerRadius > 0) {
+            setCornerRadius(cornerRadius);
+        }
+        targetId = a.getResourceId(R.styleable.BlurView_blurTarget, View.NO_ID);
+        if (targetId != View.NO_ID) {
             targetWithPreDraw = a.getBoolean(R.styleable.BlurView_blurWithPreDraw, true);
         }
         a.recycle();
@@ -78,6 +97,12 @@ public class BlurView extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+
+        log(Log.INFO, "should stop frameCallback " + (frameCallback != null));
+        if (frameCallback != null) {
+            frameCallback.stopListening();
+        }
+
         helper.setDynamic(false);
     }
 
@@ -85,7 +110,12 @@ public class BlurView extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (isHardwareAccelerated()) {
-            if (targetId != 0) {
+            log(Log.INFO, "should start frameCallback " + (frameCallback != null));
+            if (frameCallback != null) {
+                frameCallback.startListening();
+            }
+
+            if (targetId != View.NO_ID) {
                 View target = getRootView().findViewById(targetId);
                 if (target != null) {
                     with(target, targetWithPreDraw);
@@ -96,6 +126,7 @@ public class BlurView extends FrameLayout {
                 targetId = 0;
                 return;
             }
+
             helper.setDynamic(true);
         } else {
             log(Log.WARN, "BlurView can't be used in not hardware-accelerated window!");
@@ -153,6 +184,20 @@ public class BlurView extends FrameLayout {
         this.helper = helper;
     }
 
+    /**
+     * a convenient way to set rounded corners.
+     * This will replace the previously set {@link ViewOutlineProvider}
+     */
+    public void setCornerRadius(@FloatRange(from = 0) float radius) {
+        if (getOutlineProvider() instanceof RoundedOutline provider) {
+            provider.setRadius(radius);
+            invalidateOutline();
+        } else {
+            setOutlineProvider(new RoundedOutline(radius));
+        }
+        setClipToOutline(radius > 0);
+    }
+
     // Setters duplicated to be able to conveniently change these settings outside of setupWith chain
 
     /**
@@ -186,7 +231,7 @@ public class BlurView extends FrameLayout {
     /**
      * @see BlurHelper#setScale(float)
      */
-    public void setBlurScale(float scale) {
+    public void setBlurScale(@FloatRange(from = 1) float scale) {
         helper.setScale(scale);
     }
 
@@ -196,6 +241,122 @@ public class BlurView extends FrameLayout {
     @Nullable
     public String getBlurType() {
         return helper.getType();
+    }
+
+    public void setFpsListener(@Nullable FpsListener listener) {
+        if (frameCallback == null) {
+            if (listener == null) {
+                return;
+            }
+            frameCallback = new FpsFrameCallback();
+        }
+        frameCallback.setListener(listener);
+        if (listener != null) {
+            if (isAttachedToWindow()) {
+                frameCallback.startListening();
+            }
+        } else {
+            frameCallback.stopListening();
+        }
+    }
+
+    private static class RoundedOutline extends ViewOutlineProvider {
+        protected float radius;
+
+        protected RoundedOutline(float radius) {
+            setRadius(radius);
+        }
+
+        protected void setRadius(float radius) {
+            this.radius = radius;
+        }
+
+        @Override
+        public void getOutline(View view, Outline outline) {
+            outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), radius);
+        }
+
+    }
+
+    public static abstract class FpsListener {
+        protected void reportFps(float fps, float frameTookMillis) {
+            onReportFps(fps, frameTookMillis);
+        }
+
+        public abstract void onReportFps(float fps, float frameTookMillis);
+    }
+
+    public static abstract class TimePeriodFpsListener extends FpsListener {
+        private long lastReportMillis;
+        private final long periodMillis;
+
+        public TimePeriodFpsListener(long periodMillis) {
+            this.periodMillis = periodMillis;
+        }
+
+        protected void reportFps(float fps, float frameTookMillis) {
+            long currentTimeMillis = System.currentTimeMillis();
+            if (currentTimeMillis - lastReportMillis >= periodMillis) {
+                onReportFps(fps, frameTookMillis);
+                lastReportMillis = currentTimeMillis;
+            }
+        }
+    }
+
+    public static abstract class PerSecondFpsListener extends TimePeriodFpsListener {
+        public PerSecondFpsListener() {
+            super(1000);
+        }
+    }
+
+    private static class FpsFrameCallback implements Choreographer.FrameCallback {
+        @Nullable
+        private FpsListener listener;
+        private long lastTimeNanos;
+        private boolean listening;
+
+        private void postFrameCallback() {
+            Choreographer.getInstance().postFrameCallback(this);
+        }
+
+        protected void setListener(@Nullable FpsListener listener) {
+            this.listener = listener;
+        }
+
+        protected void startListening() {
+            if (listener != null && !listening) {
+                log(Log.INFO, "frameCallback started.");
+                postFrameCallback();
+                listening = true;
+            }
+        }
+
+        protected void stopListening() {
+            if (listening) {
+                log(Log.INFO, "frameCallback stopped.");
+                Choreographer.getInstance().removeFrameCallback(this);
+                listener = null;
+                listening = false;
+            }
+        }
+
+        @Override
+        public void doFrame(long frameTimeNanos) {
+            if (listener == null) {
+                return;
+            }
+
+            if (lastTimeNanos != 0) {
+                float diff = (frameTimeNanos - lastTimeNanos) / 1000000f;
+                float fps = 1000f / diff;
+                log(Log.INFO, "fps " + fps + ", frameTimeNanos " + frameTimeNanos + ", diff nanos " + diff);
+                listener.reportFps(fps, diff);
+            }
+
+            lastTimeNanos = frameTimeNanos;
+            //continue monitor
+            postFrameCallback();
+        }
     }
 
 }

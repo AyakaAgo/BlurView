@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="non_blurview_impl_hint">此页非 BlurView。</string>
+    <string name="webview_url">https://www.baidu.com/</string>
+    <string name="view_simple_rendereffect">View - 基于 RenderEffect 的简易实现</string>
+    <string name="blurview_layoutchange_imageview">BlurView - layout 变更 - ImageView</string>
+    <string name="blurview_layoutchange_webview">BlurView - layout 变更 - WebView</string>
+    <string name="blurview_predraw_webview">BlurView - 绘制监听 - WebView</string>
+</resources>

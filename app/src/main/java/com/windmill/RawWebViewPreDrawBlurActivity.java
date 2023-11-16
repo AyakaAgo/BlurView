@@ -3,29 +3,28 @@ package com.windmill;
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.RenderEffect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import com.windmill.ui.RoundedOutline;
+import com.windmill.blur.BlurView;
 import com.windmill.ui.UiUtil;
-import com.windmill.blur.PreDrawHelper;
 
 /**
- * a test class for {@link PreDrawHelper}
- * <p>
- * <strong>DO NOT</strong> use it in production environment
+ * simple implementation similar to {@link BlurView}
  */
 @RequiresApi(api = Build.VERSION_CODES.S)
-public class RawRenderEffectBlurBlurActivity extends BaseWebBlurActivity {
+public class RawWebViewPreDrawBlurActivity extends BaseWebBlurActivity {
     /**
      * bitmap holding blur data
      */
@@ -47,7 +46,12 @@ public class RawRenderEffectBlurBlurActivity extends BaseWebBlurActivity {
         };
         blurView.setElevation(blurRadius);
         blurView.setRenderEffect(RenderEffect.createBlurEffect(blurRadius, blurRadius, Shader.TileMode.CLAMP));
-        blurView.setOutlineProvider(RoundedOutline.get(blurRadius));
+        blurView.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), blurRadius);
+            }
+        });
         blurView.setClipToOutline(true);
 
         content.addView(blurView);
@@ -71,7 +75,7 @@ public class RawRenderEffectBlurBlurActivity extends BaseWebBlurActivity {
             return true;
         });
 
-        Toast.makeText(this, "This page is not blurred by BlurView.", Toast.LENGTH_SHORT)
+        Toast.makeText(this, R.string.non_blurview_impl_hint, Toast.LENGTH_SHORT)
                 .show();
     }
 

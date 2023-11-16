@@ -29,7 +29,7 @@ public class LayoutChangeHelper extends PreDrawHelper {
             needRefresh = false;
 
             //super.perform();
-            target.post(super::perform);
+            target.postOnAnimation(super::perform);
         }
     }
 
