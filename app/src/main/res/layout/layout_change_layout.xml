@@ -24,7 +24,6 @@
         app:cornerRadius="50"
         app:blurScale="12"
         app:blurTarget="@id/blur_target"
-        app:blurWithPreDraw="false"
         app:overlayColor="#10FF00FF" />
 
 </FrameLayout>

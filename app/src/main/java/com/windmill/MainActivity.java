@@ -24,7 +24,6 @@ public class MainActivity extends Activity {
         LinearLayout content = new LinearLayout(this);
         content.setGravity(Gravity.CENTER);
         content.setOrientation(LinearLayout.VERTICAL);
-
         View.OnClickListener activityStartListener = v -> {
             try {
                 startActivity(new Intent(MainActivity.this, (Class<?>) v.getTag()));
@@ -33,11 +32,9 @@ public class MainActivity extends Activity {
         };
 
         ArrayList<Impl> classes = new ArrayList<>();
-        classes.add(new Impl(getString(R.string.blurview_predraw_webview), WebViewPreDrawBlurActivity.class));
-        classes.add(new Impl(getString(R.string.blurview_layoutchange_webview), WebViewLayoutChangeBlurActivity.class));
-        classes.add(new Impl(getString(R.string.blurview_layoutchange_imageview), ImageViewLayoutChangeBlurActivity.class));
+        classes.add(new Impl(getString(R.string.blurview_blur), WebViewBlurActivity.class));
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            classes.add(new Impl(getString(R.string.view_simple_rendereffect), RawWebViewPreDrawBlurActivity.class));
+            classes.add(new Impl(getString(R.string.view_blur), RawWebViewBlurActivity.class));
         }
 
         for (Impl impl : classes) {

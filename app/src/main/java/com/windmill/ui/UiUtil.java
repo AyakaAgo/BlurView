@@ -1,9 +1,7 @@
 package com.windmill.ui;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.TypedValue;
-import android.view.View;
 
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;

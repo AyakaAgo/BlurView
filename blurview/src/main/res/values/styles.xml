@@ -7,7 +7,5 @@
         <attr name="cornerRadius" format="float"/>
         <!-- blurTarget should be in same root view with BlurView -->
         <attr name="blurTarget" format="reference"/>
-        <!-- only used when blurTarget is set  -->
-        <attr name="blurWithPreDraw" format="boolean"/>
     </declare-styleable>
 </resources>

@@ -24,20 +24,25 @@ import androidx.annotation.NonNull;
  */
 public class PreDrawHelper extends BlurHelper {
     @NonNull
-    protected final View target;
+    private final View target;
     @NonNull
     private final View blurView;
     @NonNull
     private final int[] location = new int[2];
+    private boolean initialized;
+    private boolean listenerAdded;
     //private final int[] blurViewLocation = new int[2];
     //@Nullable
     private BlurCanvas internalCanvas;
     //@Nullable
     private Bitmap internalBitmap;
-    private boolean initialized;
     @NonNull
     private final ViewTreeObserver.OnPreDrawListener drawListener = () -> {
-        perform();
+        // Not invalidating a View here, just updating the Bitmap.
+        // This relies on the HW accelerated bitmap drawing behavior in Android
+        // If the bitmap was drawn on HW accelerated canvas, it holds a reference to it and on next
+        // drawing pass the updated content of the bitmap will be rendered on the screen
+        updateBlur();
         return true;
     };
 
@@ -54,20 +59,22 @@ public class PreDrawHelper extends BlurHelper {
         init();
     }
 
-    /**
-     * perform a blur change
-     */
-    protected void perform() {
-        // Not invalidating a View here, just updating the Bitmap.
-        // This relies on the HW accelerated bitmap drawing behavior in Android
-        // If the bitmap was drawn on HW accelerated canvas, it holds a reference to it and on next
-        // drawing pass the updated content of the bitmap will be rendered on the screen
-        updateBlur();
+    @Override
+    public void setDynamic(boolean enabled) {
+        ViewTreeObserver observer = target.getViewTreeObserver();
+        if (observer.isAlive() && enabled != listenerAdded) {
+            listenerAdded = enabled;
+            if (enabled) {
+                observer.addOnPreDrawListener(drawListener);
+            } else {
+                observer.removeOnPreDrawListener(drawListener);
+            }
+        }
     }
 
     private void init() {
 
-        setDynamic(true);
+        //setDynamic(true);
 
         int measuredWidth = blurView.getWidth();
         int measuredHeight = blurView.getHeight();
@@ -196,14 +203,6 @@ public class PreDrawHelper extends BlurHelper {
         super.setEnabled(enabled);
         setDynamic(enabled);
         //blurView.invalidate();
-    }
-
-    @Override
-    public void setDynamic(boolean enabled) {
-        target.getViewTreeObserver().removeOnPreDrawListener(drawListener);
-        if (enabled) {
-            target.getViewTreeObserver().addOnPreDrawListener(drawListener);
-        }
     }
 
     @Override

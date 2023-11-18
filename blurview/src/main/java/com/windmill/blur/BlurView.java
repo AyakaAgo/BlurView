@@ -30,7 +30,7 @@ public class BlurView extends FrameLayout {
     @NonNull
     private BlurHelper helper = new BlurHelper();
     private int targetId;
-    private boolean targetWithPreDraw;
+    @Nullable
     private FpsFrameCallback frameCallback;
 
     public BlurView(Context context) {
@@ -77,9 +77,6 @@ public class BlurView extends FrameLayout {
             setCornerRadius(cornerRadius);
         }
         targetId = a.getResourceId(R.styleable.BlurView_blurTarget, View.NO_ID);
-        if (targetId != View.NO_ID) {
-            targetWithPreDraw = a.getBoolean(R.styleable.BlurView_blurWithPreDraw, true);
-        }
         a.recycle();
     }
 
@@ -118,8 +115,8 @@ public class BlurView extends FrameLayout {
             if (targetId != View.NO_ID) {
                 View target = getRootView().findViewById(targetId);
                 if (target != null) {
-                    with(target, targetWithPreDraw);
-                    log(Log.INFO, "init with target id 0x" + Integer.toHexString(targetId) + ", pre draw " + targetWithPreDraw);
+                    with(target);
+                    log(Log.INFO, "init with target id 0x" + Integer.toHexString(targetId));
                 } else {
                     log(Log.ERROR, "blurTarget should have same root view with BlurView");
                 }
@@ -134,41 +131,27 @@ public class BlurView extends FrameLayout {
     }
 
     /**
-     * @param rootView root to start blur from.
-     *                 Can be Activity's root content layout (android.R.id.content)
-     *                 or (preferably) some of your layouts. The lower amount of Views are in the root, the better for performance.
-     *                 <p>
-     *                 BlurImpl is automatically picked based on the API version.
-     *                 It uses RenderEffectBlur on API 31+, and RenderScriptBlur on older versions.
+     * @param target root to start blur from.
+     *               Can be Activity's root content layout (android.R.id.content)
+     *               or (preferably) some of your layouts. The lower amount of Views are in the root, the better for performance.
+     *               <p>
+     *               BlurImpl is automatically picked based on the API version.
+     *               It uses RenderEffectBlur on API 31+, and RenderScriptBlur on older versions.
      */
-    public void with(@NonNull View rootView) {
-        with(rootView, true);
-    }
-
-    public void with(@NonNull View rootView, boolean onPreDraw) {
+    public void with(@NonNull View target) {
         Context context = getContext();
         //noinspection deprecation
-        with(rootView, canUseRenderEffect() ? new RenderEffectBlur(context) : new RenderScriptBlur(context), onPreDraw);
+        with(target, canUseRenderEffect() ? new RenderEffectBlur(context) : new RenderScriptBlur(context));
     }
 
     /**
-     * @param rootView root to start blur from.
-     *                 Can be Activity's root content layout (android.R.id.content)
-     *                 or (preferably) some of your layouts. The lower amount of Views are in the root, the better for performance.
-     * @param impl     sets the blur impl
+     * @param target root to start blur from.
+     *               Can be Activity's root content layout (android.R.id.content)
+     *               or (preferably) some of your layouts. The lower amount of Views are in the root, the better for performance.
+     * @param impl   sets the blur impl
      */
-    public void with(@NonNull View rootView, @NonNull BlurImpl impl) {
-        with(rootView, impl, true);
-    }
-
-    public void with(@NonNull View rootView, @NonNull BlurImpl impl, boolean onPreDraw) {
-        BlurHelper helper;
-        if (onPreDraw) {
-            helper = new PreDrawHelper(this, rootView, impl);
-        } else {
-            helper = new LayoutChangeHelper(this, rootView, impl);
-        }
-        with(helper);
+    public void with(@NonNull View target, @NonNull BlurImpl impl) {
+        with(new PreDrawHelper(this, target, impl));
     }
 
     public void with(@NonNull BlurHelper helper) {
@@ -287,8 +270,8 @@ public class BlurView extends FrameLayout {
     }
 
     public static abstract class TimePeriodFpsListener extends FpsListener {
-        private long lastReportMillis;
         private final long periodMillis;
+        private long lastReportMillis;
 
         public TimePeriodFpsListener(long periodMillis) {
             this.periodMillis = periodMillis;

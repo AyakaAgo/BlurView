@@ -24,7 +24,7 @@ import com.windmill.ui.UiUtil;
  * simple implementation similar to {@link BlurView}
  */
 @RequiresApi(api = Build.VERSION_CODES.S)
-public class RawWebViewPreDrawBlurActivity extends BaseWebBlurActivity {
+public class RawWebViewBlurActivity extends BaseWebBlurActivity {
     /**
      * bitmap holding blur data
      */

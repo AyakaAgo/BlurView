@@ -21,19 +21,11 @@
         </activity>
 
         <activity
-            android:name=".ImageViewLayoutChangeBlurActivity"
+            android:name=".WebViewBlurActivity"
             android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
 
         <activity
-            android:name=".WebViewLayoutChangeBlurActivity"
-            android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
-
-        <activity
-            android:name=".WebViewPreDrawBlurActivity"
-            android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
-
-        <activity
-            android:name=".RawWebViewPreDrawBlurActivity"
+            android:name=".RawWebViewBlurActivity"
             android:configChanges="layoutDirection|uiMode|smallestScreenSize|colorMode|fontScale|orientation|screenLayout|screenSize|density" />
 
     </application>

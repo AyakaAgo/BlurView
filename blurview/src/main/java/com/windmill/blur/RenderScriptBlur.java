@@ -20,7 +20,6 @@ import androidx.annotation.RequiresApi;
  * Blur using {@link RenderScript}, processed on GPU when device drivers support it.
  * Requires API 17+
  *
- * @noinspection deprecation
  * @deprecated because RenderScript is deprecated and its hardware acceleration is not guaranteed.
  * RenderEffectBlur is the best alternative at the moment.
  */

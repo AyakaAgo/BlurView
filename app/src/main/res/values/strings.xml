@@ -2,8 +2,6 @@
 <resources>
     <string name="non_blurview_impl_hint">This page is not blurred by BlurView.</string>
     <string name="webview_url">https://www.google.com/</string>
-    <string name="view_simple_rendereffect">View - Simple RenderEffect</string>
-    <string name="blurview_layoutchange_imageview">BlurView - LayoutChange - ImageView</string>
-    <string name="blurview_layoutchange_webview">BlurView - LayoutChange - WebView</string>
-    <string name="blurview_predraw_webview">BlurView - PreDraw - WebView</string>
+    <string name="view_blur" translatable="false">View - WebView</string>
+    <string name="blurview_blur" translatable="false">BlurView - WebView</string>
 </resources>

@@ -20,8 +20,6 @@ import androidx.annotation.RequiresApi;
  * <br><br>
  * WebView blur may cause web content flicker, complex web content may case fps drops.
  */
-@Deprecated
-//@Discouraged(message = "WebView blur may cause web content flicker, complex web content may case fps drops.")
 abstract class BaseWebBlurActivity extends Activity {
     protected static final int blurRadius = 25;
     protected WebView webView;
@@ -67,9 +65,9 @@ abstract class BaseWebBlurActivity extends Activity {
         settings.setUseWideViewPort(true);
         settings.setDatabaseEnabled(true);
 
-        onCreateBlurView();
-
         webView.loadUrl(getString(R.string.webview_url));
+
+        onCreateBlurView();
 
         webViewContainer.addView(webView);
         content.addView(webViewContainer);
